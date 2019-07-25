@@ -156,14 +156,14 @@ def resize_image(image):
   r_image=float(width/height)
 
   if r_image > IMAGE_SCREEN_DIMENSION or r_image == IMAGE_SCREEN_DIMENSION:
-	r_s=FRAME_WIDTH/width
-	image_width=width*r_s
-	image_height=height*r_s
+    r_s=FRAME_WIDTH/width
+    image_width=width*r_s
+    image_height=height*r_s
 
   else:
-	r_s=FRAME_HEIGHT/height
-	image_width=width*r_s
-	image_height=height*r_s
+    r_s=FRAME_HEIGHT/height
+    image_width=width*r_s
+    image_height=height*r_s
 
   image.set_height(image_height)
 
