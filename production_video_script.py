@@ -12,6 +12,7 @@ import re
 from urllib.parse import quote as url_quote
 from builtins import ValueError
 from google_images_download import google_images_download
+from moviepy.editor import AudioFileClip as AFC
 image_response = google_images_download.googleimagesdownload()
 
 wrapper_100 = textwrap.TextWrapper(width=100,
@@ -113,11 +114,6 @@ for _ in all_incident:
   all_incident[count]['index']=count
   count+=1
 
-data_set=[[inc["description"].encode("utf-8"),inc["summary"].encode("utf-8")] for inc in all_incident]
-data_set=[[incidents[0],incidents[1]] for incidents in data_set]
-data_set=[{"title":incidents[0],"text":incidents[1]} for incidents in data_set]
-text_clip_data=[breakdown_sentences(incident["text"]) for incident in data_set]
-
 year,title_texts=[incident["year"] for incident in all_incident],[incident["description"] for incident in all_incident]
 
 def align_text_100(text):
@@ -142,7 +138,7 @@ def reshape_text_data(data):
     broken_down_sentences.append(sentences)
   return broken_down_sentences
 
-text_clip_data=reshape_text_data(text_clip_data)
+# text_clip_data=reshape_text_data(text_clip_data)
 
 title_texts = [wrapper_50.wrap(x) for x in title_texts]
 
@@ -170,13 +166,22 @@ def resize_image(image):
   image.set_width(image_width)
   return image
 
-
-
-
-
-
-
-
+def get_audio_time(titles):
+  time=0
+  temp_text=''
+  for x in titles:
+    time+=0.5
+    for y in grouper(x,2,""):
+      for m in y:
+        temp_text+=m+" "
+      time+=get_time_to_read(temp_text)
+      time+=0.3
+      temp_text=''
+  return time+0.2
+AUDIO_TIME=get_audio_time(title_texts)
+audio=AFC("/gdrive/My Drive/lil daufe/audios/birth_of_a_hero.mp3")
+audio=audio.subclip(0,AUDIO_TIME)
+audio.write_audiofile("lol.mp3")
 class final_video(Scene):
   '''
   complete video
@@ -190,7 +195,10 @@ class final_video(Scene):
   }
   def construct(self):
     self.intro_video()
+    self.remove(*self.get_mobjects())
+    self.wait()
     self.content_video()
+    self.remove(*self.get_mobjects())
     self.outro()
   
   
@@ -201,16 +209,7 @@ class final_video(Scene):
       self.intro_anim(pic,0.4)
     for pic in intro_pics[4:14]:
       self.intro_anim(pic,0.2)
-    TITLE_TEXT=r'''
-      HISTORY IN MINUTES
-    '''
-    TITLE=TextMobject(
-        TITLE_TEXT,
-        fill_color=BLACK,
-        stroke_color=WHITE,
-        stroke_width=2,
-        stroke_opacity=1
-    ).scale(2.2)
+    TITLE=ImageMobject("/gdrive/My Drive/lil daufe/him/him.png",fill_color=BLACK,).scale(5).shift(DOWN+RIGHT)
     temp_background=resize_image(ImageMobject(intro_pics[14]))
     self.add(temp_background)
     self.play(FadeIn(TITLE),run_time=0.4)
@@ -229,17 +228,20 @@ class final_video(Scene):
     self.remove(image)
 	
   def content_video(self):
-    self.add_sound("/gdrive/My Drive/lil daufe/audios/birth_of_a_hero.mp3")
+    self.add_sound("lol.mp3")
     self.IMAGE_SCREEN_DIMENSION=1920/1080
     for incident in all_incident:
       text=incident["description"]
       index=incident["index"]
       get_google_images(' '.join(get_google_search_topics(text)),index)
+#       break
     images_directory=[]
-    for directory in range(len(text_clip_data)):
+    for directory in range(len(title_texts)):
       images_directory.append(sorted(["/content/downloads/"+str(directory)+"/"+img for img in os.listdir("/content/downloads/"+str(directory))]))
-    for title,current_year,images,texts in zip(title_texts,year,images_directory,text_clip_data):
+#       break
+    for title,current_year,images in zip(title_texts,year,images_directory):
       self.image_slideshow(images[0],title,current_year)
+#       break
     os.system('rm -rf downloads')
   def image_slideshow(self,image,text,current_year):
     image_clip=ImageMobject(image)
@@ -251,7 +253,7 @@ class final_video(Scene):
 
   def animate_data(self,text,current_year):
     year_text=TextMobject("year: "+current_year,fill_color=BLACK)
-    year_text.add_background_rectangle(color=WHITE,stroke_width=10,stroke_opacity=0.75)
+    year_text.add_background_rectangle(color=WHITE,stroke_width=10,opacity=0.75)
     width=np.array([year_text.get_width(),0,0])
     year_text.move_to(0.8*TOP-(width/2)+LEFT_SIDE+(0.2*LEFT))
     self.play(year_text.shift,width+RIGHT,rate_func=linear,run_time=0.25)
@@ -312,6 +314,3 @@ class final_video(Scene):
     lil_dafue=lil_dafue_object.next_to(like_object,DOWN)
     lil_dafue=lil_dafue.shift(0.5*RIGHT)
     self.play(FadeIn(lil_dafue))
-
-  
-  
