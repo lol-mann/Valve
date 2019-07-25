@@ -189,9 +189,9 @@ class final_video(Scene):
       }
   }
   def construct(self):
-  self.intro_video()
-  self.content_video()
-  self.outro()
+    self.intro_video()
+    self.content_video()
+    self.outro()
   
   
   def intro_video(self):
